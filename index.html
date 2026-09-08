@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>એડમિન પેનલ - ક્રિષ્ના ગ્રોસરી</title>
+    <!-- FontAwesome Icons લિંક -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <!-- ૧૦૦% મફત બ્રાઉઝર-બેઝ્ડ બેકગ્રાઉન્ડ રીમુવલ લાઇબ્રેરી CDN લિંક -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- અલગથી બનાવેલી એડમિન ડિઝાઇન ફાઇલનું જોડાણ -->
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+
+    <!-- ૧. સિક્યોર લોગિન સ્ક્રીન સેક્શન -->
+    <div id="login-screen" class="login-card">
+        <h2 style="color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-lock"></i> એડમિન લોગિન</h2>
+        <p style="margin-bottom: 20px; font-size: 14px; color:#666;">૧૦૦% સિક્યોર ફ્રી કંટ્રોલ રૂમ</p>
+        <div class="form-group" style="text-align: left;">
+            <label>સિક્રેટ પાસવર્ડ નાખો</label>
+            <input type="password" id="admin-password-field" placeholder="••••••••">
+        </div>
+        <button class="btn btn-block" onclick="verifyAdminLogin()">પ્રવેશ કરો (Login)</button>
+    </div>
+
+    <!-- ૨. મુખ્ય એડમિન પેનલ કંટ્રોલ રૂમ સેક્શન (સફળ લોગિન પછી જ ખુલશે) -->
+    <div id="admin-panel-content">
+        <div class="header">
+            <h2><i class="fa-solid fa-store"></i> ક્રિષ્ના માસ્ટર એડમિન કંટ્રોલ</h2>
+            <button class="btn btn-danger" onclick="logoutAdmin()"><i class="fa-solid fa-right-from-bracket"></i> લોગઆઉટ</button>
+        </div>
+
+        <div class="container">
+            <!-- બ્લોક ૧: માસ્ટર કંટ્રોલ સેન્ટર અને એપ્લિકેશન સેટિંગ્સ નિયમો -->
+            <div class="card">
+                <h3><i class="fa-solid fa-sliders"></i> એપ્લિકેશન કંટ્રોલ અને નિયમો સેટિંગ્સ</h3>
+                
+                <div class="switch-group">
+                    <div><strong>દુકાન ચાલુ / બંધ (Shop Open/Close):</strong><br><small style="color:#666;">બંધ કરવાથી ગ્રાહક એપમાં ઓર્ડર બ્લોક થશે</small></div>
+                    <label class="switch"><input type="checkbox" id="cfg-shop-status" onchange="updateSettings()"><span class="slider"></span></label>
+                </div>
+                
+                <div class="switch-group">
+                    <div><strong>ઓટો-સ્લાઇડિંગ બેનર (Offer Banner Active):</strong><br><small style="color:#666;">ગ્રાહક એપના હોમ પેજ પર દેખાડવા માટે</small></div>
+                    <label class="switch"><input type="checkbox" id="cfg-banner-status" onchange="updateSettings()"><span class="slider"></span></label>
+                </div>
+
+                <div class="form-row" style="margin-top:15px;">
+                    <div class="form-group">
+                        <label>બેનર ઓફર લખાણ (Banner Text)</label>
+                        <input type="text" id="cfg-banner-text" placeholder="દા.ત. ₹2000 પર 1 કિલો ખાંડ મફત">
+                    </div>
+                    <div class="form-group">
+                        <label>સ્થિર સૂચના પટ્ટી લખાણ (Sticky Notice)</label>
+                        <input type="text" id="cfg-notice-text" placeholder="ડિલિવરી નિયમોનું કાયમી બોર્ડ લખાણ">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>મફત ડિલિવરી ખરીદી લિમિટ (₹)</label>
+                        <input type="number" id="cfg-free-limit" placeholder="1000">
+                    </div>
+                    <div class="form-group">
+                        <label>ઓછી ખરીદી પર લાગતો ચાર્જ (₹)</label>
+                        <input type="number" id="cfg-delivery-charge" placeholder="20">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ઓછામાં ઓછી ખરીદી મર્યાદા (Min Order ₹)</label>
+                        <input type="number" id="cfg-min-order" placeholder="200">
+                    </div>
+                    <div class="form-group">
+                        <label>📞 ગ્રાહક હેલ્પલાઇન ફોન નંબર</label>
+                        <input type="number" id="cfg-admin-phone" placeholder="તમારો ઓર્ડર ફોન નંબર">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="updateSettings()"><i class="fa-solid fa-floppy-disk"></i> બધા નિયમો સેવ કરો</button>
+            </div>
+
+            <!-- બ્લોક ૨: કેટેગરી મેનેજમેન્ટ -->
+            <div class="card">
+                <h3><i class="fa-solid fa-folder-plus"></i> કેટેગરી મેનેજમેન્ટ</h3>
+                <div class="form-group" style="flex-direction:row; gap:10px; align-items:center;">
+                    <input type="text" id="new-cat-input" placeholder="નવી કેટેગરી લખો (દા.ત. કરિયાણું, શાકભાજી)" style="flex:1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                    <button class="btn" onclick="addNewCategory()"><i class="fa-solid fa-plus"></i> ઉમેરો</button>
+                </div>
+                <div id="admin-cat-list" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;"></div>
+            </div>
+
+            <!-- બ્લોક ૩: પ્રોડક્ટ ઉમેરવાનું સ્માર્ટ ફોર્મ -->
+            <div class="card">
+                <h3><i class="fa-solid fa-basket-shopping"></i> નવી પ્રોડક્ટ ઉમેરો</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>વસ્તુનું નામ (ગુજરાતીમાં) *</label>
+                        <input type="text" id="prod-name-gu" required>
+                    </div>
+                    <div class="form-group">
+                        <label>વસ્તુનું નામ (English માં) *</label>
+                        <input type="text" id="prod-name-en" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>કેટેગરી સિલેક્ટ કરો *</label>
+                        <select id="prod-category-select"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>વજન / જથ્થો (દા.ત. 0.010 ગ્રામ, કિલો, લીટર, નંગ, પેટી) *</label>
+                        <input type="text" id="prod-weight" placeholder="દા.ત. 500 ગ્રામ, 1 કિલો, 1 લીટર" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>અસલી કિંમત (MRP ₹) *</label>
+                        <input type="number" id="prod-mrp" required>
+                    </div>
+                    <div class="form-group">
+                        <label>વેચવાની કિંમત (Selling Price ₹) *</label>
+                        <input type="number" id="prod-sprice" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>સ્ટોક જથ્થો (હાજર સ્ટોક આંકડો) *</label>
+                        <input type="number" id="prod-stock" placeholder="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label>📸 કેમેરાથી ફોટો પાડો અથવા અપલોડ કરો</label>
+                        <input type="file" id="prod-image-file" accept="image/*" onchange="processImageWithRemoval()">
+                        <div id="img-remove-status" class="loading-bg"></div>
+                    </div>
+                </div>
+                <button class="btn btn-success btn-block" onclick="saveProductData()"><i class="fa-solid fa-circle-plus"></i> પ્રોડક્ટ સ્ટોરમાં લાઇવ કરો</button>
+            </div>
+
+            <!-- બ્લોક ૪: ઇનલાઇન એડિટિંગ ઇન્વેન્ટરી ટેબલ -->
+            <div class="card">
+                <h3><i class="fa-solid fa-table-list"></i> સ્ટોર ઇન્વેન્ટરી ટેબલ (લાઇવ ઇનલાઇન એડિટિંગ પીળા બોક્સ પર ક્લિક કરો)</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ફોટો</th>
+                                <th>નામ (ગુજરાતી)</th>
+                                <th>વજન</th>
+                                <th>MRP (₹)</th>
+                                <th>વેચાણ ભાવ (₹)</th>
+                                <th>સ્ટોક</th>
+                                <th>સ્ટેટસ</th>
+                                <th>એક્શન</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body">
+                            <!-- પ્રોડક્ટ રો JavaScript દ્વારા ઉમેરાશે -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- બ્લોક ૫: લાઇવ ઓર્ડર મેનેજમેન્ટ డ్యాష్‌బోర్డ్ -->
+            <div class="card">
+                <h3><i class="fa-solid fa-bell-concierge"></i> લાઇવ ઓર્ડર મેનેજમેન્ટ</h3>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <input type="text" id="order-search-input" placeholder="ગ્રાહક નામ કે મોબાઈલ નંબરથી ઓર્ડર શોધો..." oninput="searchOrders()" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px;">
+                </div>
+                <div id="admin-orders-list-area">
+                    <!-- ઓર્ડર્સ અહીં કાયમી લાઈવ દેખાશે -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- અલગથી બનાવેલી મુખ્ય ફાયરબેઝ જોડાણ ફાઇલ લિંક -->
+    <script src="admin-firebase-config.js"></script>
+    <!-- અલગથી બનાવેલી એડમિન સિક્યોરિટી, પ્રોડક્ટ્સ અને ઓર્ડર્સ કંટ્રોલ ફાઇલો લિંક -->
+    <script src="admin-auth.js"></script>
+    <script src="admin-products.js"></script>
+    <script src="admin-orders.js"></script>
+</body>
+</html>
