@@ -3,7 +3,7 @@
    ========================================================================== */
 
 // તમારી આપેલી ૧૦૦% મફત ફાયરબેઝ ડેટાબેઝની મુખ્ય લિંક [૨]
-const dbURL = "https://firebaseio.com";
+const dbURL = "https://krishna-digital-store-default-rtdb.firebaseio.com";
 
 // આ લાઇન ચેક કરવા માટે છે કે કનેક્શન સેટ થઈ ગયું છે (ડેવલપર કન્સોલમાં દેખાશે)
 console.log("Firebase Central REST API Connection Established URL:", dbURL);
