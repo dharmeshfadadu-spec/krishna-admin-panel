@@ -1,4 +1,3 @@
-let base64ImageStr = ""; 
 /* ==========================================================================
    📦 પ્રોડક્ટ મેનેજમેન્ટ, બેકગ્રાઉન્ડ રીમુવલ અને ઇનલાઇન એડિટિંગ લોજિક
    ========================================================================== */
@@ -15,7 +14,7 @@ function updateSettings() {
         minOrderAmt: parseInt(document.getElementById('cfg-min-order').value) || 200,
         adminPhone: document.getElementById('cfg-admin-phone').value
     };
-    fetch(`${dbURL}/settings.json`, { method: "PUT", body: JSON.stringify(data) }) [૨]
+    fetch(`${dbURL}/settings.json`, { method: "PUT", body: JSON.stringify(data) }) 
     .then(() => alert("બધા જ નિયમો અને કંટ્રોલ સેટિંગ્સ સફળતાપૂર્વક અપડેટ થયા!"));
 }
 
@@ -44,14 +43,14 @@ function addNewCategory() {
     let val = document.getElementById('new-cat-input').value.trim();
     if(!val) return;
     allCategories.push(val);
-    fetch(`${dbURL}/categories.json`, { method: "PUT", body: JSON.stringify(allCategories) }) [૨]
+    fetch(`${dbURL}/categories.json`, { method: "PUT", body: JSON.stringify(allCategories) }) 
     .then(() => { document.getElementById('new-cat-input').value = ''; loadAdminDashboardData(); });
 }
 
 function deleteCategory(index) {
     if(confirm("શું તમે આ કેટેગરી ડીલીટ કરવા માંગો છો?")) {
         allCategories.splice(index, 1);
-        fetch(`${dbURL}/categories.json`, { method: "PUT", body: JSON.stringify(allCategories) }) [૨]
+        fetch(`${dbURL}/categories.json`, { method: "PUT", body: JSON.stringify(allCategories) }) 
         .then(() => loadAdminDashboardData());
     }
 }
@@ -107,7 +106,7 @@ function saveProductData() {
         image: base64ImageStr || "https://placeholder.com", active: true
     };
 
-    fetch(`${dbURL}/products/${prodID}.json`, { method: "PUT", body: JSON.stringify(productData) }) [૨]
+    fetch(`${dbURL}/products/${prodID}.json`, { method: "PUT", body: JSON.stringify(productData) }) 
     .then(() => {
         alert("નવી વસ્તુ સફળતાપૂર્વક સ્ટોરમાં ઉમેરાઈ ગઈ છે!");
         base64ImageStr = "";
@@ -154,17 +153,17 @@ function inlineEditValue(id, field, currentVal) {
     if(newVal === null || newVal.trim() === "") return;
     let parsedVal = (field === 'mrp' || field === 'sprice' || field === 'stock') ? parseFloat(newVal) : newVal;
     
-    fetch(`${dbURL}/products/${id}/${field}.json`, { method: "PUT", body: JSON.stringify(parsedVal) }) [૨]
+    fetch(`${dbURL}/products/${id}/${field}.json`, { method: "PUT", body: JSON.stringify(parsedVal) }) 
     .then(() => loadAdminDashboardData());
 }
 
 function toggleProductActive(id, status) {
-    fetch(`${dbURL}/products/${id}/active.json`, { method: "PUT", body: status }); [૨]
+    fetch(`${dbURL}/products/${id}/active.json`, { method: "PUT", body: status }); 
 }
 
 function deleteProductData(id) {
     if(confirm("શું તમે આ પ્રોડક્ટ કાયમ માટે કાઢી નાખવા માંગો છો?")) {
-        fetch(`${dbURL}/products/${id}.json`, { method: "DELETE" }) [૨]
+        fetch(`${dbURL}/products/${id}.json`, { method: "DELETE" }) 
         .then(() => loadAdminDashboardData());
     }
 }
