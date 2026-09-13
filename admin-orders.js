@@ -115,7 +115,7 @@ function updateOrderStatus(orderID, newStatus) {
     fetch(`${dbURL}/orders/${orderID}/status.json`, { 
         method: "PUT", 
         body: JSON.stringify(newStatus) 
-    }) [૨]
+    }) 
     .then(res => res.json())
     .then(() => {
         alert(`ઓર્ડર સ્ટેટસ બદલાઈને "${newStatus}" થઈ ગયું છે.`);
