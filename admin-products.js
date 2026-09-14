@@ -216,3 +216,7 @@ function deleteProductData(id) {
         fetch(`${dbURL}/products/${id}.json`, { method: "DELETE" })
         .then(() => {
             if (typeof loadAdminDashboardData === 'function') { loadAdminDashboardData(); }
+        });
+    }
+}
+       
