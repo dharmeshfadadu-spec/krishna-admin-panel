@@ -2,12 +2,12 @@
    📦 માસ્ટર પ્રોડક્ટ મેનેજમેન્ટ, લાઈટવેઇટ કમ્પ્રેસર અને કેટેગરી કંટ્રોલ લોજિક
    ========================================================================== */
 
-// ગ્લોબલ વેરિએબલ્સ જાહેર કરવા (કોડ ક્રેશ થતો અટકાવવા માટે)
+// ગ્લોબલ વેરિએબલ્સ (કોડ ક્રેશ થતો અટકાવવા માટે)
 let base64ImageStr = ""; 
-let allProducts = {};
-let allCategories = [];
+if (typeof allProducts === 'undefined') { var allProducts = {}; }
+if (typeof allCategories === 'undefined') { var allCategories = []; }
 
-// એપ્લિકેશનના મુખ્ય નિયમો અપડેટ કરવાનું ફંક્શન
+// સેટિંગ્સ અપડેટ કરવાનું ફંક્શન
 function updateSettings() {
     let data = {
         shopOpen: document.getElementById('cfg-shop-status').checked,
@@ -23,7 +23,7 @@ function updateSettings() {
     .then(() => alert("બધા જ નિયમો અને કંટ્રોલ સેટિંગ્સ સફળતાપૂર્વક અપડેટ થયા!"));
 }
 
-// 🔴 કેટેગરી કંટ્રોલ લોજિક - આઇકોનની જગ્યાએ ૧૦૦% દેખાય તેવું લાલ ડીલીટ બટન સેટ કર્યું છે
+// 🔴 કેટેગરી કંટ્રોલ લોજિક - ૧૦૦% દેખાય તેવું લાલ ડીલીટ બટન
 function updateCategoryUI() {
     const select = document.getElementById('prod-category-select');
     const divList = document.getElementById('admin-cat-list');
@@ -38,8 +38,7 @@ function updateCategoryUI() {
         select.appendChild(opt);
 
         let bubble = document.createElement('div');
-        bubble.style = "background:#eee; padding:5px 10px; border-radius:4px; display:flex; align-items:center; gap:8px; font-size:14px;";
-        // 💡 ફિક્સ: ફોન્ટ-આઇકોન વગરનું ૧૦૦% વર્કિંગ લાલ '× ડીલીટ' બટન
+        bubble.style = "background:#eee; padding:5px 10px; border-radius:4px; display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:5px;";
         bubble.innerHTML = `${cat} <span style="color:red; font-weight:bold; cursor:pointer; margin-left:8px; border:1px solid red; padding:1px 5px; border-radius:3px; font-size:11px;" onclick="deleteCategory(${index})">× ડીલીટ</span>`;
         divList.appendChild(bubble);
     });
@@ -50,29 +49,33 @@ function addNewCategory() {
     if(!val) return;
     allCategories.push(val);
     fetch(`${dbURL}/categories.json`, { method: "PUT", body: JSON.stringify(allCategories) })
-    .then(() => { document.getElementById('new-cat-input').value = ''; loadAdminDashboardData(); });
+    .then(() => { 
+        document.getElementById('new-cat-input').value = ''; 
+        if (typeof loadAdminDashboardData === 'function') { loadAdminDashboardData(); }
+    });
 }
 
 function deleteCategory(index) {
     if(confirm("શું તમે આ કેટેગરી ડીલીટ કરવા માંગો છો?")) {
         allCategories.splice(index, 1);
         fetch(`${dbURL}/categories.json`, { method: "PUT", body: JSON.stringify(allCategories) })
-        .then(() => loadAdminDashboardData());
+        .then(() => {
+            if (typeof loadAdminDashboardData === 'function') { loadAdminDashboardData(); }
+        });
     }
 }
 
-// ⚡ સ્માર્ટ ઓન-ડિમાન્ડ લોડર: એપ ૧ સેકન્ડમાં ખુલશે, ફોટો પાડતી વખતે જ બેકગ્રાઉન્ડ સફેદ થઈને ૧૦-૨૦ KB માં ફરી જશે [૧.૩.૬]
+// ⚡ સ્માર્ટ ઓન-ડિમાન્ડ લોડર: ૧૦-૨૦ KB સુપર કમ્પ્રેસર અને ઓટો બેકગ્રાઉન્ડ રીમુવલ [૧.૩.૬]
 async function processImageWithRemoval() {
     const fileInput = document.getElementById('prod-image-file');
     const statusDiv = document.getElementById('img-remove-status');
     if (!fileInput || fileInput.files.length === 0) return;
     
-    const file = fileInput.files[0];
+    const file = fileInput.files[0]; // ફાઈલ ઓબ્જેક્ટ બરાબર પકડવો
     statusDiv.style.color = "orange";
     statusDiv.innerText = "⏳ જાદુઈ ટૂલ લોડ થઈ રહ્યું છે... (પહેલી વાર થોડી સેકન્ડ લાગી શકે છે)...";
     
     try {
-        // ૧. ઓન-ડિમાન્ડ સ્માર્ટ લોડિંગ (એપ સુપર ફાસ્ટ ખોલવા માટે)
         if (typeof imglyBackgroundRemoval === 'undefined') {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -84,18 +87,14 @@ async function processImageWithRemoval() {
         }
         
         statusDiv.innerText = "⏳ બેકગ્રાઉન્ડ સફેદ થઈ રહ્યું છે અને સાઈઝ ૧૦-૨૦ KB માં બદલાઈ રહી છે...";
-        
-        // ૨. ઓટો બેકગ્રાઉન્ડ કટિંગ (લાઈટવેઇટ મોડેલ) [૧.૩.૪]
         const blob = await imglyBackgroundRemoval(file, { model: "small" }); // [૧.૩.૪]
         
-        // ૩. ૧૦-૨૦ KB સુપર કમ્પ્રેસર કેનવાસ લોજિક
         const img = new Image();
         img.src = URL.createObjectURL(blob);
         img.onload = function() {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // 💡 ઓપ્ટિમાઇઝેશન: ક્વોલિટી જાળવીને સાઇઝ ૧૦-૨૦ KB કરવા માટે પહોળાઈ 400px કરી
             const MAX_WIDTH = 400; 
             let width = img.width;
             let height = img.height;
@@ -109,13 +108,11 @@ async function processImageWithRemoval() {
             canvas.height = height;
             ctx.drawImage(img, 0, 0, width, height);
             
-            // 💡 ઓપ્ટિમાઇઝેશન: 45% (0.45) ક્વોલિટી સેટ કરી જેથી ફોટો ફાટે નહીં અને સાઇઝ એકદમ નાની બને
             base64ImageStr = canvas.toDataURL('image/jpeg', 0.45); 
             statusDiv.style.color = "green";
             statusDiv.innerHTML = "<b>✅ બેકગ્રાઉન્ડ સફેદ થયું અને ફોટો સુપર-કોમ્પ્રેસ (10-20 KB) થઈ ગયો!</b>";
         };
     } catch (error) {
-        // સેફ્ટી બાયપાસ: જો કોઈ નેટવર્ક એરર આવે તો ઓરિજિનલ ફોટો જ કેનવાસથી ૧૦-૨૦ KB માં ફેરવી દેશે
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = function (event) {
@@ -154,7 +151,7 @@ function saveProductData() {
     let productData = {
         id: prodID, nameGu, nameEn, category, weight,
         mrp: parseFloat(mrp), sprice: parseFloat(sprice), stock: parseInt(stock),
-        image: typeof base64ImageStr !== 'undefined' && base64ImageStr ? base64ImageStr : "https://placeholder.com", 
+        image: base64ImageStr ? base64ImageStr : "https://placeholder.com", 
         active: true
     };
 
@@ -170,11 +167,11 @@ function saveProductData() {
         document.getElementById('prod-stock').value = '';
         document.getElementById('prod-image-file').value = '';
         document.getElementById('img-remove-status').innerText = '';
-        loadAdminDashboardData();
+        if (typeof loadAdminDashboardData === 'function') { loadAdminDashboardData(); }
     });
 }
 
-// ઇનલાઇન એડિટિંગ ઇન્વેન્ટરી ટેબલ રેન્ડર સિસ્ટમ
+// ઇન્વેન્ટરી ટેબલ રેન્ડર
 function renderInventoryTable() {
     const tbody = document.getElementById('inventory-table-body');
     if (!tbody) return;
@@ -193,16 +190,29 @@ function renderInventoryTable() {
             <td>
                 <label class="switch"><input type="checkbox" ${p.active !== false ? 'checked' : ''} onchange="toggleProductActive('${id}', this.checked)"><span class="slider"></span></label>
             </td>
-            <td><button class="btn btn-danger" style="padding:5px 10px;" onclick="deleteProductData('${id}')"><i class="fa-solid fa-trash"></i></button></td>
+            <td><button class="btn btn-danger" style="padding:5px 10px;" onclick="deleteProductData('${id}')">કાઢો</button></td>
         `;
         tbody.appendChild(tr);
     }
 }
 
-// ડાયરેક્ટ ઇનલાઇન ટેબલ માસ્ટર અપડેટ લોજિક (પીળા બોક્સ પર ક્લિકથી સેવ થશે)
 function inlineEditValue(id, field, currentVal) {
     let newVal = prompt(`નવી કિંમત/વિગત લખો:`, currentVal);
     if(newVal === null || newVal.trim() === "") return;
     let parsedVal = (field === 'mrp' || field === 'sprice' || field === 'stock') ? parseFloat(newVal) : newVal;
     
     fetch(`${dbURL}/products/${id}/${field}.json`, { method: "PUT", body: JSON.stringify(parsedVal) })
+    .then(() => {
+        if (typeof loadAdminDashboardData === 'function') { loadAdminDashboardData(); }
+    });
+}
+
+function toggleProductActive(id, status) {
+    fetch(`${dbURL}/products/${id}/active.json`, { method: "PUT", body: status });
+}
+
+function deleteProductData(id) {
+    if(confirm("શું તમે આ પ્રોડક્ટ કાયમ માટે કાઢી નાખવા માંગો છો?")) {
+        fetch(`${dbURL}/products/${id}.json`, { method: "DELETE" })
+        .then(() => {
+            if (typeof loadAdminDashboardData === 'function') { loadAdminDashboardData(); }
